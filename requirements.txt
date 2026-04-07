@@ -1,0 +1,22 @@
+# Core
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+gunicorn>=22.0.0            # recommended for production multi-worker deployments
+pydantic>=2.0.0
+
+# Security & rate limiting
+slowapi>=0.1.9
+python-dotenv>=1.0.0
+
+# HTTP client — used by DigitalOcean and Generic backends
+httpx>=0.27.0
+
+# LLM providers (install what you need)
+anthropic>=0.28.0       # required for LLM_PROVIDER=anthropic
+
+# Session persistence (optional)
+redis>=5.0.0            # required for REDIS_URL; server falls back to in-memory if absent
+
+# Dev / testing
+# pytest>=8.0.0
+# pytest-asyncio>=0.23.0
