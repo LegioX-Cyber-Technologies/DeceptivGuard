@@ -54,4 +54,4 @@ Open `http://localhost:8000/demo` in your browser — the split-panel demo shows
 
 ---
 
-> **Deployment note:** DeceptivGuard is designed for authenticated internal APIs and security operations contexts. A classification error in a consumer-facing product would serve fabricated content to a legitimate user. See [Known limitations](docs/how-it-works.md#limitations) before deploying in consumer-facing or regulated environments.
+> **Deployment note:** DeceptivGuard is designed for authenticated internal APIs and security operations contexts. A classification error in a consumer-facing product would serve fabricated content to a legitimate user. See [Known limitations](docs/how-it-works.md#known-limitations) before deploying in consumer-facing or regulated environments.

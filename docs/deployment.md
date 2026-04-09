@@ -1,19 +1,32 @@
 # Deployment
 
-[← Back to README](../README.md) · [Overview](overview.md) · [Quick Start](quickstart.md) · [Configuration](configuration.md)
+**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md)
+
+---
+
+## Contents
+
+- [System dependencies](#system-dependencies)
+- [Firewall](#firewall)
+- [Redis](#redis)
+- [TLS certificate](#tls-certificate)
+- [Nginx config](#nginx-config)
+- [Run the server](#run-the-server)
+- [systemd service](#systemd-service)
+- [Security checklist](#security-checklist)
 
 ---
 
 This guide covers a full production setup: Nginx as a TLS-terminating reverse proxy, Let's Encrypt certificates, Redis for multi-worker session state, and a systemd service.
 
-## 1. System dependencies
+## System dependencies
 
 ```bash
 apt update && apt upgrade -y
 apt install -y python3 python3-pip python3-venv nginx certbot python3-certbot-nginx redis-server
 ```
 
-## 2. Firewall
+## Firewall
 
 Port 8000 must **not** be reachable externally — uvicorn should only accept connections from Nginx on localhost.
 
@@ -27,7 +40,7 @@ ufw enable
 
 Alternatively, block port 8000 via your cloud provider's network firewall (AWS Security Groups, DigitalOcean Cloud Firewalls, GCP VPC firewall rules).
 
-## 3. Redis
+## Redis
 
 ```bash
 systemctl enable --now redis-server
@@ -39,11 +52,11 @@ Add to `.env`:
 REDIS_URL=redis://127.0.0.1:6379
 ```
 
-Redis stores session metadata with a 24-hour TTL. Without it, each uvicorn worker has an independent in-memory session store — cumulative risk scoring and rate limits will not work correctly across workers.
+Redis stores session metadata with a 24-hour TTL. Without it, each worker process has an independent in-memory session store and cumulative risk scoring will not work correctly across workers.
 
-## 4. TLS certificate
+## TLS certificate
 
-Point your subdomain's DNS A record at the server IP first, then:
+Point your domain's DNS A record at the server IP first, then:
 
 ```bash
 certbot --nginx -d your.domain.com
@@ -55,19 +68,17 @@ Certbot handles renewal automatically via a systemd timer. Test with:
 certbot renew --dry-run
 ```
 
-**Self-signed certificate (dev only):**
+**Self-signed certificate (local/dev only):**
 
 ```bash
 bash generate_certs.sh
-# outputs: certs/cert.pem  certs/key.pem
-
-# Custom hostname:
-bash generate_certs.sh certs 365 myserver.internal
+# Custom hostname: bash generate_certs.sh certs 365 myserver.internal
 ```
 
-> When Nginx terminates TLS (recommended), leave `SSL_CERTFILE` and `SSL_KEYFILE` unset in `.env`. Nginx handles the certificate; uvicorn listens on `127.0.0.1:8000` over plain HTTP internally.
+> [!NOTE]
+> When Nginx terminates TLS (recommended for production), leave `SSL_CERTFILE` and `SSL_KEYFILE` **unset** in `.env`. Nginx handles the certificate; uvicorn listens on `127.0.0.1:8000` over plain HTTP internally. Setting both causes a conflict.
 
-## 5. Nginx config
+## Nginx config
 
 ```nginx
 server {
@@ -98,23 +109,23 @@ server {
     }
 
     location /session/ {
-        proxy_pass             http://127.0.0.1:8000;
-        proxy_set_header       Host $host;
-        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_pass       http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /health {
-        proxy_pass             http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:8000;
     }
 
-    # Demo (only if DEMO_ENABLED=true in .env)
+    # Only needed when DEMO_ENABLED=true
     location /demo {
-        proxy_pass             http://127.0.0.1:8000;
-        proxy_set_header       Host $host;
-        proxy_set_header       X-Real-IP $remote_addr;
-        proxy_buffering        off;
-        proxy_cache            off;
-        add_header             X-Accel-Buffering no;
+        proxy_pass       http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_buffering  off;
+        proxy_cache      off;
+        add_header       X-Accel-Buffering no;
     }
 
     location / { return 404; }
@@ -132,9 +143,9 @@ chmod 755 /etc/letsencrypt/live/
 chmod 755 /etc/letsencrypt/archive/
 ```
 
-## 6. Run the server
+## Run the server
 
-For production, use **gunicorn with uvicorn workers**. Gunicorn provides worker lifecycle management — it restarts crashed workers, recycles workers after a set number of requests, and kills hung workers.
+Use **gunicorn with uvicorn workers** for production. Gunicorn provides robust worker lifecycle management — restarting crashed workers, recycling them after a set number of requests to prevent memory leaks, and killing hung workers.
 
 ```bash
 pip install gunicorn
@@ -153,7 +164,7 @@ ENVIRONMENT=production gunicorn server:app \
 
 Worker count guideline: `(2 × CPU cores) + 1`. Check with `nproc`.
 
-## 7. systemd service
+## systemd service
 
 ```ini
 # /etc/systemd/system/deceptivguard.service
@@ -185,35 +196,20 @@ systemctl daemon-reload
 systemctl enable --now deceptivguard
 ```
 
-## TLS via uvicorn (alternative to Nginx)
-
-```env
-# .env
-SSL_CERTFILE=certs/cert.pem
-SSL_KEYFILE=certs/key.pem
-```
-
-```bash
-python server.py
-# or
-uvicorn server:app --ssl-certfile certs/cert.pem --ssl-keyfile certs/key.pem --port 8000
-```
-
-> Do not set `SSL_CERTFILE`/`SSL_KEYFILE` when Nginx handles TLS — this causes a conflict.
-
 ## Security checklist
 
 | Control | Implementation |
 |---|---|
 | API key auth on all routes | `X-API-Key` header; 503 if key not configured |
-| Constant-time key comparison | `hmac.compare_digest()` — prevents timing attacks |
-| Separate admin credential | `X-Admin-Key` for session endpoints |
+| Constant-time comparison | `hmac.compare_digest()` on all key checks — prevents timing attacks |
+| Separate admin credential | `X-Admin-Key` for session endpoints; falls back to `GUARDRAIL_API_KEY` if unset |
 | `SESSION_SECRET` enforced in prod | `RuntimeError` at startup if unset in production |
 | HMAC-bound session IDs | Callers cannot rotate IPs to reset session scores |
 | CORS locked to allowlist | `ALLOWED_ORIGINS` in `.env`; never `*` |
-| Input size limits | `MAX_MESSAGE_CHARS`, `MAX_SYSTEM_CHARS`, `MAX_MESSAGES` via Pydantic |
+| Input size limits | `MAX_MESSAGE_CHARS`, `MAX_SYSTEM_CHARS`, `MAX_MESSAGES` enforced via Pydantic |
 | ReDoS mitigation | All regex applied to first 4,096 chars only |
-| Swagger UI disabled in prod | `ENVIRONMENT=production` disables `/docs` |
-| `_debug` field stripped in prod | Full guardrail metadata never returned in production |
+| Swagger UI disabled in prod | `ENVIRONMENT=production` disables `/docs` and `/redoc` |
+| `_debug` field stripped in prod | Full guardrail metadata never returned to callers in production |
 | Raw query text never stored | Session history stores metadata only |
 | Redis TTL | 24 h session expiry via `SETEX` |
+| Error message sanitisation | LLM backend errors always return generic message — internal details never leaked |

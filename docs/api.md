@@ -1,6 +1,18 @@
 # API Reference
 
-[← Back to README](../README.md) · [Overview](overview.md) · [Quick Start](quickstart.md) · [Threat Hunting](threat-hunting.md)
+**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md)
+
+---
+
+## Contents
+
+- [Endpoints](#endpoints)
+- [Send a message](#send-a-message)
+- [Get session history](#get-session-history)
+- [Delete a session](#delete-a-session)
+- [Health check](#health-check)
+- [Session ID notes](#session-id-notes)
+- [Code examples](#code-examples)
 
 ---
 
@@ -18,7 +30,9 @@
 
 ---
 
-## POST /v1/messages
+## Send a message
+
+`POST /v1/messages`
 
 ### Request headers
 
@@ -50,10 +64,10 @@
     "decoy_id": "a3f7c2e9b1d04852"
   },
   "llm_response": {
-    "content":      "Hello! How can I help?",
-    "model":        "claude-sonnet-4-20250514",
-    "stop_reason":  "end_turn",
-    "input_tokens": 12,
+    "content":       "Hello! How can I help?",
+    "model":         "claude-sonnet-4-20250514",
+    "stop_reason":   "end_turn",
+    "input_tokens":  12,
     "output_tokens": 8
   },
   "_debug": {
@@ -67,15 +81,20 @@
 ```
 
 - `guardrail.query_id` — always present; UUID for log correlation
-- `guardrail.decoy_id` — present only when `action == "deceive"`; 16-char hex log-correlation reference
+- `guardrail.decoy_id` — present only when `action == "deceive"`; 16-char hex for cross-referencing downstream activity
 - `_debug` — development mode only; stripped automatically in production
 - For `block` actions, `llm_response.content` is `"I can't help with that request."` and token counts are `0`
 
+> [!NOTE]
+> The `decoy_id` is your primary attribution token. Log it alongside the session ID — when suspicious downstream activity appears (a failed auth attempt using a fabricated credential, a probe of a fabricated IP), `decoy_id` lets you confirm the attacker was served a deception response. See [Threat Hunting](threat-hunting.md).
+
 ---
 
-## GET /session/{id}
+## Get session history
 
-Returns cumulative risk score and the full history of `deceive`-action entries for a session. Requires `X-Admin-Key` header.
+`GET /session/{id}` — requires `X-Admin-Key` header.
+
+Returns the cumulative risk score and the full history of `deceive`-action entries for a session.
 
 ```bash
 curl -s https://your-domain/session/SESSION_ID \
@@ -104,7 +123,9 @@ Returns `{"cumulative_score": 0, "history": []}` if the session has no DECEIVE e
 
 ---
 
-## DELETE /session/{id}
+## Delete a session
+
+`DELETE /session/{id}` — requires `X-Admin-Key` header.
 
 Removes the session's score and history immediately.
 
@@ -115,7 +136,9 @@ curl -X DELETE https://your-domain/session/SESSION_ID \
 
 ---
 
-## GET /health
+## Health check
+
+`GET /health`
 
 ```json
 {
@@ -128,7 +151,26 @@ curl -X DELETE https://your-domain/session/SESSION_ID \
 
 ---
 
-## Python example
+## Session ID notes
+
+`X-Session-Id` is optional but strongly recommended. The server derives the actual session ID as:
+
+```
+session_id = HMAC-SHA256(SESSION_SECRET, api_key:ip:sanitize(namespace))[:32]
+```
+
+- Without `X-Session-Id`, all requests from the same IP + API key share one session
+- The namespace is sanitised: truncated to 64 chars, only `[a-zA-Z0-9\-_]` allowed
+- Callers cannot predict or forge the server-side session ID, even if they know the API key
+
+> [!TIP]
+> For browser-based clients behind a CDN (where the IP may change), use a browser-generated UUID stored in `localStorage` as the namespace. The demo page does this automatically.
+
+---
+
+## Code examples
+
+### Python
 
 ```python
 import httpx
@@ -154,7 +196,7 @@ query_id = data["guardrail"]["query_id"]
 decoy_id = data["guardrail"].get("decoy_id")   # None unless action=deceive
 ```
 
-## curl example
+### curl
 
 ```bash
 curl -s https://your-domain/v1/messages \
@@ -167,17 +209,3 @@ curl -s https://your-domain/v1/messages \
     "messages": [{"role": "user", "content": "Hello"}]
   }' | jq .llm_response.content
 ```
-
-## Session ID notes
-
-`X-Session-Id` is optional but strongly recommended. The server derives the actual session ID as:
-
-```
-session_id = HMAC-SHA256(SESSION_SECRET, api_key:ip:sanitize(namespace))[:32]
-```
-
-- Without `X-Session-Id`, all requests from the same IP + API key share one session
-- The namespace value is sanitised: truncated to 64 chars, only `[a-zA-Z0-9\-_]` allowed
-- Callers cannot predict or forge the server-side session ID, even if they know the API key
-
-> For browser-based clients behind a CDN (where the IP may change), use a browser-generated UUID stored in `localStorage` as the namespace. The demo page does this automatically.
