@@ -39,14 +39,14 @@ Open `http://localhost:8000/demo` in your browser — the split-panel demo shows
 
 | | |
 |---|---|
-| [How It Works](docs/how-it-works.html) | Architecture, decision model, worked examples, attacker opacity |
-| [Quick Start](docs/quickstart.html) | Installation, configuration, first API call |
-| [Detection](docs/detection.html) | Threat categories, jailbreak patterns, custom rules |
-| [Deception](docs/deception.html) | Templates, generative mode, refusal re-query, output scanner |
-| [Deployment](docs/deployment.html) | Production setup, TLS, nginx, Redis, systemd |
-| [Configuration](docs/configuration.html) | Full environment variable reference |
-| [API Reference](docs/api.html) | Endpoints, request/response format, session API |
-| [Threat Hunting](docs/threat-hunting.html) | Deceive log, attribution, session inspection |
+| [How It Works](docs/how-it-works.md) | Architecture, decision model, worked examples, attacker opacity |
+| [Quick Start](docs/quickstart.md) | Installation, configuration, first API call |
+| [Detection](docs/detection.md) | Threat categories, jailbreak patterns, custom rules |
+| [Deception](docs/deception.md) | Templates, generative mode, refusal re-query, output scanner |
+| [Deployment](docs/deployment.md) | Production setup, TLS, nginx, Redis, systemd |
+| [Configuration](docs/configuration.md) | Full environment variable reference |
+| [API Reference](docs/api.md) | Endpoints, request/response format, session API |
+| [Threat Hunting](docs/threat-hunting.md) | Deceive log, attribution, session inspection |
 
 ## Research
 
@@ -54,4 +54,4 @@ Open `http://localhost:8000/demo` in your browser — the split-panel demo shows
 
 ---
 
-> **Deployment note:** DeceptivGuard is designed for authenticated internal APIs and security operations contexts. A classification error in a consumer-facing product would serve fabricated content to a legitimate user. See [Known limitations](docs/how-it-works.html#limitations) before deploying in consumer-facing or regulated environments.
+> **Deployment note:** DeceptivGuard is designed for authenticated internal APIs and security operations contexts. A classification error in a consumer-facing product would serve fabricated content to a legitimate user. See [Known limitations](docs/how-it-works.md#limitations) before deploying in consumer-facing or regulated environments.
