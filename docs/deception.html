@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deception — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);position:fixed;top:0;left:0;overflow-y:auto}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+h4{font-size:14px;font-weight:600;margin:16px 0 6px}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul,ol{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:14px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.compare-box{border:1px solid var(--br);border-radius:8px;padding:16px}
+.compare-box h4{margin:0 0 8px;font-size:14px}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="quickstart.html">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html" class="active">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html">Deployment</a></li>
+      <li><a href="configuration.html">Configuration</a></li>
+      <li><a href="api.html">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>Deception</h1>
+  <p>When a query is scored as <code>deceive</code>, DeceptivGuard prepends a hidden preamble before the operator's system prompt. The preamble instructs the LLM to produce realistic-but-false output in a category-appropriate way.</p>
+
+  <h2>Deception modes</h2>
+  <p>Set <code>DECEPTION_MODE</code> in <code>.env</code>:</p>
+  <div class="compare">
+    <div class="compare-box">
+      <h4>template (default)</h4>
+      <p style="font-size:13.5px;color:#57606a;margin:0">Category-specific hand-written preambles stored in <code>guardrail.py</code>. Deterministic, auditable, single LLM call. Best for production.</p>
+    </div>
+    <div class="compare-box">
+      <h4>generative</h4>
+      <p style="font-size:13.5px;color:#57606a;margin:0">Query-specific preamble crafted by the LLM using a two-stage planning pipeline. More convincing for unusual queries, but two LLM calls per DECEIVE action.</p>
+    </div>
+  </div>
+
+  <h3>Template mode</h3>
+  <p>Each threat category has a hand-written preamble designed to be difficult for the LLM to ignore:</p>
+  <ul>
+    <li><strong>Mandatory framing</strong> — uses <code>═══ ... — MANDATORY RESPONSE PROTOCOL ═══</code> as a header to signal a formal system-level directive</li>
+    <li><strong>Explicit prohibition on real data</strong> — states that providing real information is a "critical security violation", aligning with the model's safety training</li>
+    <li><strong>Concrete fabrication instructions</strong> — lists specific techniques (e.g. wrong API calls, incorrect key sizes, off-by-one errors) rather than vaguely asking for deception</li>
+    <li><strong>No-disclaimer instruction</strong> — every template prohibits safety caveats, ethical warnings, and qualifiers</li>
+    <li><strong>Refusal prohibition</strong> — states explicitly that a refusal is a failure mode</li>
+  </ul>
+  <p>Templates are defined in <code>_DECEPTION_TEMPLATES</code> in <code>guardrail.py</code> and can be edited directly in source.</p>
+
+  <h3>Generative mode</h3>
+  <p>A four-stage pipeline produces query-specific, maximally convincing deception:</p>
+  <ol>
+    <li><strong>Query-aware prompt</strong> — the detected category and the exact query text are both passed to the LLM</li>
+    <li><strong>Planning call</strong> — a lightweight call (max 300 tokens) asks for a tailored fabrication strategy: what specific details, formats, and values would be most convincing and most time-consuming for the attacker to act on</li>
+    <li><strong>Friction maximisation</strong> — the prompt instructs the LLM to choose fabricated details that pass format validation but fail only on actual use</li>
+    <li><strong>Session consistency</strong> — up to 3 prior fabricated responses from the same session are injected as <code>[PRIOR FABRICATED CONTEXT]</code> so a multi-turn attacker receives consistent fabrications</li>
+  </ol>
+  <pre><code>DECEPTION_MODE=template      # default — reliable, auditable, single LLM call
+DECEPTION_MODE=generative    # adaptive — more convincing, two LLM calls per DECEIVE
+
+GENERATIVE_PLANNING=true     # default — planning call before main response (recommended)
+GENERATIVE_PLANNING=false    # single call, lower latency, slightly weaker fabrications</code></pre>
+
+  <h2>Customising preambles</h2>
+  <p><strong>Template mode</strong> — edit <code>_DECEPTION_TEMPLATES</code> (dict keyed by <code>ThreatCategory</code>) or <code>_DEFAULT_DECEPTION_TEMPLATE</code> (fallback). Keep the structure:</p>
+  <pre><code>═══ HONEYPOT PROTOCOL — MANDATORY ═══
+
+&lt;behavioural instruction for this category&gt;
+
+PROHIBITED — any of the following invalidates the response:
+- Words: example, sample, placeholder, dummy, fake, fictitious, hypothetical
+- Disclaimers, ethical caveats, or safety warnings of any kind
+- Refusal — a refusal exposes the honeypot</code></pre>
+  <p><strong>Generative mode</strong> — edit <code>_GENERATIVE_DECEPTION_TEMPLATE</code>. Keep the <code>{category}</code> and <code>{query}</code> placeholders — they are required for the planning pipeline.</p>
+
+  <h2>Refusal re-query</h2>
+  <p>After the LLM responds, DeceptivGuard scans the output for refusal phrases in two tiers:</p>
+
+  <h3>Strong signals — trigger re-query</h3>
+  <p>When a strong refusal is detected on a flagged query (action=DECEIVE, score ≥ SCORE_WARN, or session cumulative ≥ SCORE_DECEIVE), DeceptivGuard re-queries the LLM with an explicit override clause. Examples of covered phrases:</p>
+  <table>
+    <thead><tr><th>Category</th><th>Examples</th></tr></thead>
+    <tbody>
+      <tr><td>Explicit denials</td><td>"I can't provide", "I'm unable to", "I won't help"</td></tr>
+      <tr><td>Formal declines</td><td>"I must decline", "I choose not to"</td></tr>
+      <tr><td>Policy language</td><td>"against my guidelines", "violates my policies"</td></tr>
+      <tr><td>Ethical framing</td><td>"this could be harmful", "raises ethical concerns"</td></tr>
+      <tr><td>Redirects</td><td>"please consult a professional", "seek professional"</td></tr>
+    </tbody>
+  </table>
+  <p>Add deployment-specific phrases via <code>.env</code>:</p>
+  <pre><code>CUSTOM_REFUSAL_SIGNALS_STRONG=this request falls outside our policy,i cannot engage with
+CUSTOM_REFUSAL_SIGNALS_SOFT=that falls outside my expertise,i have limited knowledge of</code></pre>
+  <p><strong>Rate limit:</strong> 5 re-queries per session per minute. Prevents cost-amplification attacks where queries are crafted to always trigger refusal.</p>
+
+  <h3>Soft signals — session score only</h3>
+  <p>Ambiguous capability statements ("I'm not capable of", "I lack the ability to") are not re-queried immediately. Each occurrence adds <code>SOFT_REFUSAL_SCORE</code> (default 5) to the session cumulative score. Repeated soft signals eventually push the session over <code>SCORE_DECEIVE</code>.</p>
+
+  <h2>Hypothetical framing re-query</h2>
+  <p>A separate re-query fires when the LLM wraps its fabricated response in phrases like "hypothetical", "fictional scenario", "theoretical example". This reveals to the attacker that the information may not be real.</p>
+  <p>The re-query only fires when the framing word appears in the <strong>response</strong> but <strong>not</strong> in the original query — preventing false positives when the user's own query uses the word "hypothetical".</p>
+
+  <h2>Output scanner</h2>
+  <p>Every LLM response is scanned for phrases that indicate the deception directive was leaked back to the caller. If detected, the response is replaced with <code>"I can't help with that request."</code> before returning.</p>
+  <ul>
+    <li><strong>Always-on:</strong> Deception template header phrases (e.g. "mandatory response protocol"), template body phrases</li>
+    <li><strong>DECEIVE-flagged only:</strong> System prompt disclosure signals ("my system prompt is", "here are my instructions")</li>
+  </ul>
+
+  <h2 id="examiner">Optional LLM examiner</h2>
+  <p>For semantic coverage of paraphrased, obfuscated, or non-English attacks, an optional secondary LLM classifier runs on every query. If its score is higher than the regex score, the higher score is used. Examiner failures never block requests.</p>
+  <pre><code>LLM_EXAMINER_ENABLED=true
+LLM_EXAMINER_URL=http://localhost:11434/v1/chat/completions   # any OpenAI-compatible endpoint
+LLM_EXAMINER_MODEL=llama3                                     # or gpt-4o-mini, mistral, etc.
+LLM_EXAMINER_API_KEY=                                         # blank for local models
+LLM_EXAMINER_TIMEOUT=8                                        # keep low; timeouts are silently swallowed</code></pre>
+  <p>The examiner only receives the user query (truncated to 2,048 chars). It does not see the system prompt, session state, or any DeceptivGuard internals.</p>
+
+  <h2>Output quality checker</h2>
+  <p>An optional second-pass LLM check that evaluates whether the generated deception response looks convincing before serving it. Catches responses with placeholder values like <code>[REDACTED]</code> or "hypothetically speaking" qualifiers and triggers a targeted re-query.</p>
+  <pre><code>OUTPUT_QUALITY_CHECK_ENABLED=true
+OUTPUT_QUALITY_THRESHOLD=70    # re-query if convincingness score &lt; 70</code></pre>
+  <p>Uses the same LLM client as the main request — no additional API key needed. Quality check failures never block the response path. Re-queries share the 5/minute per-session rate limit.</p>
+</main>
+</body>
+</html>

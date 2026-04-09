@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deployment — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);position:fixed;top:0;left:0;overflow-y:auto}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul,ol{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:14px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="quickstart.html">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html" class="active">Deployment</a></li>
+      <li><a href="configuration.html">Configuration</a></li>
+      <li><a href="api.html">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>Deployment</h1>
+  <p>This guide covers a full production setup: Nginx as a TLS-terminating reverse proxy, Let's Encrypt certificates, Redis for multi-worker session state, and a systemd service.</p>
+
+  <h2>1. System dependencies</h2>
+  <pre><code>apt update && apt upgrade -y
+apt install -y python3 python3-pip python3-venv nginx certbot python3-certbot-nginx redis-server</code></pre>
+
+  <h2>2. Firewall</h2>
+  <p>Port 8000 must <strong>not</strong> be reachable externally — uvicorn should only accept connections from Nginx on localhost.</p>
+  <pre><code>ufw allow 22
+ufw allow 80      # required for Let's Encrypt HTTP-01 challenge
+ufw allow 443
+ufw deny 8000     # uvicorn must not be reachable externally
+ufw enable</code></pre>
+  <p>Alternatively, block port 8000 via your cloud provider's network firewall (AWS Security Groups, DigitalOcean Cloud Firewalls, GCP VPC firewall rules).</p>
+
+  <h2>3. Redis</h2>
+  <pre><code>systemctl enable --now redis-server</code></pre>
+  <p>Add to <code>.env</code>:</p>
+  <pre><code>REDIS_URL=redis://127.0.0.1:6379</code></pre>
+  <p>Redis stores session metadata with a 24-hour TTL. Without it, each uvicorn worker has an independent in-memory session store — cumulative risk scoring and rate limits will not work correctly across workers.</p>
+
+  <h2>4. TLS certificate</h2>
+  <p>Point your subdomain's DNS A record at the server IP first, then:</p>
+  <pre><code>certbot --nginx -d your.domain.com</code></pre>
+  <p>Certbot handles renewal automatically via a systemd timer. Test with:</p>
+  <pre><code>certbot renew --dry-run</code></pre>
+
+  <h3>Self-signed certificate (dev only)</h3>
+  <pre><code>bash generate_certs.sh
+# outputs: certs/cert.pem  certs/key.pem
+
+# Custom hostname:
+bash generate_certs.sh certs 365 myserver.internal</code></pre>
+
+  <div class="note">
+    When Nginx terminates TLS (recommended), leave <code>SSL_CERTFILE</code> and <code>SSL_KEYFILE</code> unset in <code>.env</code>. Nginx handles the certificate; uvicorn listens on <code>127.0.0.1:8000</code> over plain HTTP internally.
+  </div>
+
+  <h2>5. Nginx config</h2>
+  <pre><code>server {
+    listen 80;
+    server_name your.domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name your.domain.com;
+
+    ssl_certificate     /etc/letsencrypt/live/your.domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your.domain.com/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    location /v1/ {
+        proxy_pass             http://127.0.0.1:8000;
+        proxy_set_header       Host $host;
+        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header       X-Forwarded-Proto $scheme;
+        proxy_read_timeout     120s;
+        proxy_buffering        off;    # required for SSE streaming
+        proxy_cache            off;
+        add_header             X-Accel-Buffering no;
+    }
+
+    location /session/ {
+        proxy_pass             http://127.0.0.1:8000;
+        proxy_set_header       Host $host;
+        proxy_set_header       X-Real-IP $remote_addr;
+    }
+
+    location /health {
+        proxy_pass             http://127.0.0.1:8000;
+    }
+
+    # Demo (only if DEMO_ENABLED=true in .env)
+    location /demo {
+        proxy_pass             http://127.0.0.1:8000;
+        proxy_set_header       Host $host;
+        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_buffering        off;
+        proxy_cache            off;
+        add_header             X-Accel-Buffering no;
+    }
+
+    location / { return 404; }
+}</code></pre>
+  <pre><code>nginx -t && systemctl reload nginx</code></pre>
+  <p>If nginx cannot read the cert files:</p>
+  <pre><code>chmod 755 /etc/letsencrypt/live/
+chmod 755 /etc/letsencrypt/archive/</code></pre>
+
+  <h2>6. Run the server</h2>
+  <p>For production, use <strong>gunicorn with uvicorn workers</strong>. Gunicorn provides worker lifecycle management — it restarts crashed workers, recycles workers after a set number of requests to prevent memory leaks, and kills hung workers.</p>
+  <pre><code>pip install gunicorn
+
+ENVIRONMENT=production gunicorn server:app \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --workers 4 \
+  --bind 127.0.0.1:8000 \
+  --timeout 120 \
+  --keep-alive 5 \
+  --max-requests 1000 \
+  --max-requests-jitter 100 \
+  --access-logfile - \
+  --error-logfile -</code></pre>
+  <p>Worker count guideline: <code>(2 × CPU cores) + 1</code>. Check with <code>nproc</code>.</p>
+
+  <h2>7. systemd service (optional)</h2>
+  <pre><code># /etc/systemd/system/deceptivguard.service
+[Unit]
+Description=DeceptivGuard
+After=network.target redis.service
+
+[Service]
+User=www-data
+WorkingDirectory=/path/to/DeceptivGuard
+EnvironmentFile=/path/to/DeceptivGuard/.env
+ExecStart=/path/to/DeceptivGuard/venv/bin/gunicorn server:app \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --workers 4 \
+  --bind 127.0.0.1:8000 \
+  --timeout 120 \
+  --keep-alive 5 \
+  --max-requests 1000 \
+  --max-requests-jitter 100
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+  <pre><code>systemctl daemon-reload
+systemctl enable --now deceptivguard</code></pre>
+
+  <h2>TLS via uvicorn (alternative)</h2>
+  <p>If you prefer to terminate TLS in uvicorn instead of Nginx:</p>
+  <pre><code># .env
+SSL_CERTFILE=certs/cert.pem
+SSL_KEYFILE=certs/key.pem
+
+# Start
+python server.py
+# or
+uvicorn server:app --ssl-certfile certs/cert.pem --ssl-keyfile certs/key.pem --port 8000</code></pre>
+  <div class="warn">
+    Do not set <code>SSL_CERTFILE</code>/<code>SSL_KEYFILE</code> when Nginx handles TLS — this causes a conflict.
+  </div>
+
+  <h2>Security checklist</h2>
+  <table>
+    <thead><tr><th>Control</th><th>Implementation</th></tr></thead>
+    <tbody>
+      <tr><td>API key auth on all routes</td><td><code>X-API-Key</code> header; 503 if key not configured</td></tr>
+      <tr><td>Constant-time key comparison</td><td><code>hmac.compare_digest()</code> — prevents timing attacks</td></tr>
+      <tr><td>Separate admin credential</td><td><code>X-Admin-Key</code> for session endpoints</td></tr>
+      <tr><td><code>SESSION_SECRET</code> enforced in prod</td><td><code>RuntimeError</code> at startup if unset in production</td></tr>
+      <tr><td>HMAC-bound session IDs</td><td>Callers cannot rotate IPs to reset session scores</td></tr>
+      <tr><td>CORS locked to allowlist</td><td><code>ALLOWED_ORIGINS</code> in <code>.env</code>; never <code>*</code></td></tr>
+      <tr><td>Input size limits</td><td><code>MAX_MESSAGE_CHARS</code>, <code>MAX_SYSTEM_CHARS</code>, <code>MAX_MESSAGES</code> via Pydantic</td></tr>
+      <tr><td>ReDoS mitigation</td><td>All regex applied to first 4,096 chars only</td></tr>
+      <tr><td>Swagger UI disabled in prod</td><td><code>ENVIRONMENT=production</code> disables <code>/docs</code></td></tr>
+      <tr><td><code>_debug</code> field stripped in prod</td><td>Full guardrail metadata never returned in production</td></tr>
+      <tr><td>Raw query text never stored</td><td>Session history stores metadata only</td></tr>
+      <tr><td>Redis TTL</td><td>24 h session expiry via <code>SETEX</code></td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Start — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);padding:0;position:fixed;top:0;left:0;overflow-y:auto}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul,ol{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:14px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.step{display:flex;gap:16px;margin-bottom:28px}
+.step-num{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--ac);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.step-body{flex:1}
+.step-body h3{margin-top:0}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="quickstart.html" class="active">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html">Deployment</a></li>
+      <li><a href="configuration.html">Configuration</a></li>
+      <li><a href="api.html">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>Quick Start</h1>
+
+  <h2>Prerequisites</h2>
+  <ul>
+    <li>Python 3.10+</li>
+    <li>An API key for Anthropic, DigitalOcean GenAI, or any OpenAI-compatible provider</li>
+  </ul>
+
+  <h2>Installation</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Clone and install</h3>
+      <pre><code>git clone https://github.com/yourusername/DeceptivGuard
+cd DeceptivGuard
+python -m venv venv
+source venv/bin/activate   # Windows: venv\Scripts\activate
+pip install -r requirements.txt</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Configure secrets</h3>
+      <pre><code>cp .env.example .env</code></pre>
+      <p>Open <code>.env</code> and set at minimum:</p>
+      <pre><code># Authentication
+GUARDRAIL_API_KEY=&lt;generate: python -c "import secrets; print(secrets.token_hex(32))"&gt;
+SESSION_SECRET=&lt;generate the same way&gt;
+
+# LLM backend — pick one:
+LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+LLM_MODEL=claude-sonnet-4-20250514</code></pre>
+      <p>See <a href="configuration.html">Configuration</a> for all options including DigitalOcean and generic OpenAI-compatible providers.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Start the server</h3>
+      <pre><code>uvicorn server:app --reload --port 8000</code></pre>
+      <p>The server starts in development mode. Swagger UI is available at <code>http://localhost:8000/docs</code>.</p>
+    </div>
+  </div>
+
+  <h2>Interactive demo</h2>
+  <p>Open <code>http://localhost:8000/demo</code> in your browser. The split-panel interface shows:</p>
+  <ul>
+    <li><strong>Left (User view)</strong> — what an attacker actually receives. Deception looks like a normal LLM response.</li>
+    <li><strong>Right (Defender view)</strong> — the guardrail's internal assessment: action, category, score, matched pattern.</li>
+  </ul>
+  <p>Click the example chips at the top to fire a representative query for each threat category with one click.</p>
+
+  <h2>Your first API call</h2>
+  <pre><code>import httpx
+
+response = httpx.post(
+    "http://localhost:8000/v1/messages",
+    headers={
+        "X-API-Key":    "your-guardrail-api-key",
+        "X-Session-Id": "user-abc-123",   # optional; ties queries to a session
+        "Content-Type": "application/json",
+    },
+    json={
+        "model":      "claude-sonnet-4-20250514",
+        "max_tokens": 1024,
+        "messages":   [{"role": "user", "content": "Hello, how are you?"}],
+    },
+)
+
+data     = response.json()
+reply    = data["llm_response"]["content"]   # always the text to show the user
+query_id = data["guardrail"]["query_id"]     # UUID for log correlation
+action   = data["_debug"]["action"]          # pass/warn/deceive/block (dev mode only)
+</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> The <code>_debug</code> field (which includes action, score, category) is only present in development mode (<code>ENVIRONMENT=development</code>, the default). It is stripped automatically in production.
+  </div>
+
+  <h2>LLM providers</h2>
+
+  <h3>Anthropic</h3>
+  <pre><code>LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+LLM_MODEL=claude-sonnet-4-20250514</code></pre>
+
+  <h3>DigitalOcean GenAI</h3>
+  <pre><code>LLM_PROVIDER=digitalocean
+DO_API_KEY=dop_v1_...
+DO_ENDPOINT_URL=https://&lt;agent-id&gt;.agents.do-ai.run</code></pre>
+
+  <h3>Any OpenAI-compatible endpoint (Ollama, vLLM, OpenAI, etc.)</h3>
+  <pre><code>LLM_PROVIDER=generic
+GENERIC_ENDPOINT_URL=http://localhost:11434/v1   # Ollama example
+GENERIC_API_KEY=                                  # blank for local models
+GENERIC_AUTH_PREFIX=                              # blank for Ollama</code></pre>
+
+  <h2>Production</h2>
+  <p>For a production deployment with nginx, TLS, Redis, and a systemd service, see the <a href="deployment.html">Deployment guide</a>.</p>
+
+  <div class="warn">
+    <strong>Multi-worker note:</strong> When running with <code>--workers N &gt; 1</code>, set <code>REDIS_URL</code> in <code>.env</code>. Without Redis, each worker has an independent session store and cumulative scoring will not function correctly across workers.
+  </div>
+</main>
+</body>
+</html>

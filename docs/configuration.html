@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configuration — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);position:fixed;top:0;left:0;overflow-y:auto}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:13.5px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.required{color:#dc2626;font-size:11px;font-weight:600;text-transform:uppercase;vertical-align:middle;margin-left:4px}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="quickstart.html">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html">Deployment</a></li>
+      <li><a href="configuration.html" class="active">Configuration</a></li>
+      <li><a href="api.html">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>Configuration</h1>
+  <p>All configuration is done via environment variables, typically in a <code>.env</code> file. Copy <code>.env.example</code> to <code>.env</code> to get started. Variables marked <span class="required">required</span> must be set.</p>
+
+  <h2>Required</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>GUARDRAIL_API_KEY</code> <span class="required">required</span></td><td>Clients must send this in <code>X-API-Key</code>.<br>Generate: <code>python -c "import secrets; print(secrets.token_hex(32))"</code></td></tr>
+      <tr><td><code>SESSION_SECRET</code> <span class="required">required in prod</span></td><td>HMAC secret for server-controlled session ID derivation. Without this, session IDs use an unsalted hash and can be predicted if the API key is known. Generate the same way as above.</td></tr>
+      <tr><td><code>LLM_PROVIDER</code></td><td><code>anthropic</code> / <code>digitalocean</code> / <code>generic</code>. Omit for echo/test mode (no LLM forwarding).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Anthropic provider</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Your Anthropic API key (<code>sk-ant-...</code>)</td></tr>
+      <tr><td><code>LLM_MODEL</code></td><td>Model to use (default <code>claude-sonnet-4-20250514</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>DigitalOcean provider</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>DO_API_KEY</code></td><td>DigitalOcean personal access token (<code>dop_v1_...</code>)</td></tr>
+      <tr><td><code>DO_ENDPOINT_URL</code></td><td>Base agent URL from the DO GenAI console (client appends <code>/api/v1/chat/completions</code> automatically)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Generic provider (any OpenAI-compatible)</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>GENERIC_ENDPOINT_URL</code></td><td>—</td><td>Base URL; <code>/chat/completions</code> appended automatically</td></tr>
+      <tr><td><code>GENERIC_API_KEY</code></td><td>—</td><td>API key or token</td></tr>
+      <tr><td><code>GENERIC_AUTH_HEADER</code></td><td><code>Authorization</code></td><td>Header name for the key</td></tr>
+      <tr><td><code>GENERIC_AUTH_PREFIX</code></td><td><code>Bearer </code></td><td>Prefix before the key value (blank for Ollama)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Infrastructure</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>ADMIN_API_KEY</code></td><td>Falls back to <code>GUARDRAIL_API_KEY</code></td><td>Separate credential for <code>GET/DELETE /session/{id}</code></td></tr>
+      <tr><td><code>REDIS_URL</code></td><td>in-memory</td><td>e.g. <code>redis://localhost:6379/0</code>. <strong>Required for multi-worker deployments.</strong></td></tr>
+      <tr><td><code>FLUSH_SESSIONS_ON_STARTUP</code></td><td>(empty)</td><td><code>all</code> to wipe every session on startup; or comma-separated list of session IDs. Remove after first restart.</td></tr>
+      <tr><td><code>ALLOWED_ORIGINS</code></td><td>localhost</td><td>Comma-separated CORS allowlist</td></tr>
+      <tr><td><code>RATE_LIMIT</code></td><td><code>30/minute</code></td><td>Per-IP limit (main endpoint)</td></tr>
+      <tr><td><code>DEMO_RATE_LIMIT</code></td><td><code>10/minute</code></td><td>Per-IP limit (unauthenticated <code>/demo/chat</code>)</td></tr>
+      <tr><td><code>SESSION_RATE_LIMIT</code></td><td><code>60</code></td><td>Requests/minute per session</td></tr>
+      <tr><td><code>ENVIRONMENT</code></td><td><code>development</code></td><td>Set <code>production</code> to disable Swagger UI, demo, and <code>_debug</code> field</td></tr>
+      <tr><td><code>DEMO_ENABLED</code></td><td>(unset)</td><td>Set <code>true</code> to enable <code>/demo</code> in production</td></tr>
+      <tr><td><code>DECEPTION_MODE</code></td><td><code>template</code></td><td><code>template</code> or <code>generative</code></td></tr>
+      <tr><td><code>GENERATIVE_PLANNING</code></td><td><code>true</code></td><td>Planning call before main response (generative mode only)</td></tr>
+      <tr><td><code>SSL_CERTFILE</code></td><td>—</td><td>Path to TLS certificate (leave unset when Nginx handles TLS)</td></tr>
+      <tr><td><code>SSL_KEYFILE</code></td><td>—</td><td>Path to TLS private key</td></tr>
+      <tr><td><code>HOST</code></td><td><code>0.0.0.0</code></td><td>Bind address (only used with <code>python server.py</code>)</td></tr>
+      <tr><td><code>PORT</code></td><td><code>8000</code></td><td>Bind port</td></tr>
+      <tr><td><code>WORKERS</code></td><td><code>1</code></td><td>Worker process count</td></tr>
+      <tr><td><code>DECEIVE_LOG</code></td><td><code>deceive_log.jsonl</code></td><td>Path for the deception event log. Set empty to disable file logging.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Thresholds</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Range</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>SCORE_BLOCK</code></td><td><code>90</code></td><td>50–100</td><td>Hard block threshold</td></tr>
+      <tr><td><code>SCORE_DECEIVE</code></td><td><code>40</code></td><td>1–SCORE_BLOCK-1</td><td>Deception injection threshold</td></tr>
+      <tr><td><code>SCORE_WARN</code></td><td><code>20</code></td><td>1–SCORE_DECEIVE-1</td><td>Warn-only threshold</td></tr>
+      <tr><td><code>SESSION_DECEIVE_THRESHOLD</code></td><td><code>300</code></td><td>50–100000</td><td>Cumulative session score that forces <code>deceive</code> on all subsequent non-zero queries</td></tr>
+      <tr><td><code>SOFT_REFUSAL_SCORE</code></td><td><code>5</code></td><td>1–50</td><td>Score added to session per soft-refusal event in LLM response</td></tr>
+      <tr><td><code>MAX_MESSAGE_CHARS</code></td><td><code>32768</code></td><td>—</td><td>Max characters per message</td></tr>
+      <tr><td><code>MAX_SYSTEM_CHARS</code></td><td><code>16384</code></td><td>—</td><td>Max characters for system prompt</td></tr>
+      <tr><td><code>MAX_MESSAGES</code></td><td><code>100</code></td><td>—</td><td>Max messages per request</td></tr>
+    </tbody>
+  </table>
+  <p>Constraint: <code>SCORE_WARN &lt; SCORE_DECEIVE &lt; SCORE_BLOCK</code> must hold. Out-of-range values are clamped with a startup warning.</p>
+
+  <h3>Threshold tuning examples</h3>
+  <pre><code># Deceive earlier — catch more borderline probing
+SCORE_DECEIVE=30
+SCORE_WARN=15
+
+# Stricter hard block
+SCORE_BLOCK=70   # queries scoring 70–89 are blocked instead of deceived
+
+# Force deception on persistent probers faster
+SESSION_DECEIVE_THRESHOLD=150</code></pre>
+
+  <h2>Custom detection</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>CUSTOM_JAILBREAK_PATTERNS</code></td><td>—</td><td>Comma-separated substrings → <code>jailbreak</code> category</td></tr>
+      <tr><td><code>CUSTOM_JAILBREAK_SCORE</code></td><td><code>75</code></td><td>Score for custom jailbreak matches (clamped to <code>[SCORE_DECEIVE, SCORE_BLOCK-1]</code>)</td></tr>
+      <tr><td><code>CUSTOM_INPUT_PATTERNS</code></td><td>—</td><td>Comma-separated substrings → <code>custom</code> category</td></tr>
+      <tr><td><code>CUSTOM_INPUT_SCORE</code></td><td><code>50</code></td><td>Score for custom input pattern matches (clamped to <code>[1, SCORE_BLOCK-1]</code>)</td></tr>
+      <tr><td><code>CUSTOM_RULES_FILE</code></td><td>—</td><td>Path to JSON rules file (see <a href="detection.html">Detection</a>)</td></tr>
+      <tr><td><code>OBFUSCATION_CHAR_THRESHOLD</code></td><td><code>5</code></td><td>Minimum invisible Unicode codepoints to classify a query as jailbreak</td></tr>
+      <tr><td><code>CUSTOM_REFUSAL_SIGNALS_STRONG</code></td><td>—</td><td>Extra strong-refusal substrings (trigger re-query on flagged sessions)</td></tr>
+      <tr><td><code>CUSTOM_REFUSAL_SIGNALS_SOFT</code></td><td>—</td><td>Extra soft-refusal substrings (accumulate <code>SOFT_REFUSAL_SCORE</code> per occurrence)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Optional LLM examiner</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>LLM_EXAMINER_ENABLED</code></td><td><code>false</code></td><td>Enable secondary LLM classifier</td></tr>
+      <tr><td><code>LLM_EXAMINER_URL</code></td><td>—</td><td>Any OpenAI-compatible endpoint</td></tr>
+      <tr><td><code>LLM_EXAMINER_MODEL</code></td><td>—</td><td>Model name (e.g. <code>llama3</code>, <code>gpt-4o-mini</code>)</td></tr>
+      <tr><td><code>LLM_EXAMINER_API_KEY</code></td><td>—</td><td>Leave blank for local models</td></tr>
+      <tr><td><code>LLM_EXAMINER_TIMEOUT</code></td><td><code>8</code></td><td>Seconds; keep low to limit latency impact</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Output quality checker</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>OUTPUT_QUALITY_CHECK_ENABLED</code></td><td><code>false</code></td><td>Enable deception quality validation</td></tr>
+      <tr><td><code>OUTPUT_QUALITY_THRESHOLD</code></td><td><code>70</code></td><td>Re-query if convincingness score &lt; this value</td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);padding:0;position:fixed;top:0;left:0;overflow-y:auto;flex-shrink:0}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700;letter-spacing:-0.01em}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+h4{font-size:14px;font-weight:600;margin:16px 0 6px}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul,ol{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:14px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;font-family:monospace}
+.pass{background:#dcfce7;color:#16a34a}.warn-b{background:#fef9c3;color:#d97706}.deceive{background:#fed7aa;color:#c2410c}.block{background:#fee2e2;color:#dc2626}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:20px 0}
+.card{border:1px solid var(--br);border-radius:8px;padding:18px;transition:box-shadow .15s}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.card h4{margin-top:0;color:var(--ac)}
+.card p{margin:0;font-size:13.5px;color:#57606a}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html" class="active">Overview</a></li>
+      <li><a href="quickstart.html">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html">Deployment</a></li>
+      <li><a href="configuration.html">Configuration</a></li>
+      <li><a href="api.html">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>DeceptivGuard</h1>
+  <p style="font-size:17px;color:#57606a;margin-bottom:28px">An LLM guardrail proxy that deceives attackers instead of refusing them.</p>
+
+  <h2>The core idea</h2>
+  <p>Traditional guardrails refuse malicious queries — which tells the attacker exactly what was detected and prompts them to refine their approach. DeceptivGuard takes the opposite stance: let the query through, but poison the response.</p>
+  <p>A hidden deception preamble is injected before the operator's system prompt, instructing the LLM to return <strong>realistic-but-false</strong> output. Fabricated credentials fail on use. Invented IPs lead nowhere. Broken malware silently crashes. The attacker wastes time acting on information that was designed to waste their time.</p>
+  <p>Legitimate users are never affected — the detection threshold ensures only clearly suspicious queries are deceived, and clean queries pass through completely unchanged.</p>
+
+  <h2>Actions</h2>
+  <p>Every query is scored 0–100 by a stack of threat detectors. The highest score across all detectors determines what happens:</p>
+  <table>
+    <thead><tr><th>Score</th><th>Action</th><th>What the caller receives</th><th>LLM called?</th></tr></thead>
+    <tbody>
+      <tr><td>0–19</td><td><span class="badge pass">PASS</span></td><td>Normal LLM response, unmodified</td><td>Yes</td></tr>
+      <tr><td>20–39</td><td><span class="badge warn-b">WARN</span></td><td>Normal LLM response, flagged internally</td><td>Yes</td></tr>
+      <tr><td>40–89</td><td><span class="badge deceive">DECEIVE</span></td><td>Fabricated LLM response</td><td>Yes (with preamble)</td></tr>
+      <tr><td>90–100</td><td><span class="badge block">BLOCK</span></td><td>Synthetic refusal — nothing forwarded</td><td>No</td></tr>
+    </tbody>
+  </table>
+  <p>Session history also matters: once a session's cumulative score crosses a configurable threshold, even low-scoring queries are automatically escalated to <code>deceive</code>. Persistent attackers who probe gradually are caught over time.</p>
+
+  <h2>What DeceptivGuard does not do</h2>
+  <ul>
+    <li>It does not tell the attacker they were detected.</li>
+    <li>It does not change response format in a detectable way — DECEIVE responses look identical to normal responses from the caller's perspective.</li>
+    <li>It does not store raw query text (only metadata and the fabricated response).</li>
+    <li>It does not add new LLM data recipients — the same provider you'd call directly receives the same message content.</li>
+  </ul>
+
+  <h2>Documentation</h2>
+  <div class="cards">
+    <a href="quickstart.html" class="card" style="text-decoration:none;color:inherit"><h4>Quick Start</h4><p>Install, configure, and make your first call in under 5 minutes.</p></a>
+    <a href="how-it-works.html" class="card" style="text-decoration:none;color:inherit"><h4>How It Works</h4><p>Architecture, decision model, worked examples, and attacker opacity.</p></a>
+    <a href="detection.html" class="card" style="text-decoration:none;color:inherit"><h4>Detection</h4><p>8 built-in threat categories, jailbreak patterns, and custom rules.</p></a>
+    <a href="deception.html" class="card" style="text-decoration:none;color:inherit"><h4>Deception</h4><p>Templates, generative mode, refusal re-query, and the output scanner.</p></a>
+    <a href="deployment.html" class="card" style="text-decoration:none;color:inherit"><h4>Deployment</h4><p>Production setup with nginx, Redis, TLS, and systemd.</p></a>
+    <a href="configuration.html" class="card" style="text-decoration:none;color:inherit"><h4>Configuration</h4><p>Full reference for every environment variable.</p></a>
+    <a href="api.html" class="card" style="text-decoration:none;color:inherit"><h4>API Reference</h4><p>Endpoints, request/response format, and calling examples.</p></a>
+    <a href="threat-hunting.html" class="card" style="text-decoration:none;color:inherit"><h4>Threat Hunting</h4><p>Deceive log, fabricated-content attribution, session management.</p></a>
+  </div>
+
+  <h2>Research paper</h2>
+  <p>The design rationale, threat model, and evaluation of DeceptivGuard's deception strategy are documented in the accompanying paper:</p>
+  <p><a href="../paper/DeceptivGuard.pdf">DeceptivGuard: LLM Deception as a Guardrail Strategy (PDF)</a></p>
+
+  <div class="warn" style="margin-top:32px">
+    <strong>Deployment scope:</strong> DeceptivGuard is designed for authenticated internal APIs and security operations contexts. Deploying it in public consumer-facing products or legally regulated environments requires additional consideration — see <a href="how-it-works.html#limitations">Known limitations</a>.
+  </div>
+</main>
+</body>
+</html>

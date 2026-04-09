@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Reference — DeceptivGuard</title>
+<style>
+:root{--sb:#1a1f2e;--sb-t:#c9d1d9;--ac:#4f8ef7;--bg:#fff;--tx:#24292f;--br:#d0d7de;--cb:#0d1117;--ct:#c9d1d9;--nb:#ddf4ff;--wb:#fff8c5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:var(--tx);display:flex;min-height:100vh;background:var(--bg)}
+.sb{width:248px;min-height:100vh;background:var(--sb);position:fixed;top:0;left:0;overflow-y:auto}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid #2d3a4a;margin-bottom:8px}
+.sb-brand a{color:#fff;text-decoration:none;font-size:16px;font-weight:700}
+.sb-brand span{display:block;color:#5a6a7a;font-size:11px;margin-top:3px}
+.sb nav ul{list-style:none}
+.sb nav .section{display:block;padding:14px 20px 4px;color:#5a6a7a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em}
+.sb nav ul li a{display:block;padding:7px 20px;color:var(--sb-t);text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:background .12s,color .12s}
+.sb nav ul li a:hover{background:rgba(79,142,247,.12);color:var(--ac)}
+.sb nav ul li a.active{background:rgba(79,142,247,.15);color:var(--ac);border-left-color:var(--ac)}
+.main{margin-left:248px;padding:48px 60px 80px;max-width:980px;width:100%}
+h1{font-size:28px;font-weight:700;margin-bottom:8px;padding-bottom:14px;border-bottom:1px solid var(--br)}
+h2{font-size:20px;font-weight:600;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--br)}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px;color:#1a1f2e}
+h4{font-size:14px;font-weight:600;margin:16px 0 6px}
+p{margin-bottom:12px}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+ul{margin:0 0 12px 24px}
+li{margin-bottom:5px}
+code{background:#f0f2f4;border-radius:4px;padding:2px 5px;font-family:'SFMono-Regular',Consolas,monospace;font-size:13px;color:#c7254e}
+pre{background:var(--cb);color:var(--ct);border-radius:8px;padding:18px 22px;overflow-x:auto;margin:12px 0 20px;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+table{border-collapse:collapse;width:100%;margin:10px 0 20px;font-size:14px}
+th{background:#f6f8fa;font-weight:600;text-align:left;padding:9px 14px;border:1px solid var(--br)}
+td{padding:8px 14px;border:1px solid var(--br);vertical-align:top}
+tr:hover td{background:#fafbfc}
+.note{background:var(--nb);border-left:4px solid var(--ac);border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.warn{background:var(--wb);border-left:4px solid #d4a72c;border-radius:0 6px 6px 0;padding:12px 16px;margin:16px 0;font-size:14px}
+.endpoint{border:1px solid var(--br);border-radius:8px;margin:20px 0;overflow:hidden}
+.endpoint-header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#f6f8fa;border-bottom:1px solid var(--br)}
+.method{padding:3px 10px;border-radius:4px;font-family:monospace;font-size:13px;font-weight:700}
+.method-post{background:#dbeafe;color:#1d4ed8}
+.method-get{background:#dcfce7;color:#15803d}
+.method-delete{background:#fee2e2;color:#dc2626}
+.endpoint-path{font-family:monospace;font-size:14px;font-weight:600}
+.endpoint-desc{color:#57606a;font-size:13px;margin-left:auto}
+.endpoint-body{padding:16px 18px}
+.endpoint-body p:last-child,.endpoint-body pre:last-child{margin-bottom:0}
+</style>
+</head>
+<body>
+<nav class="sb">
+  <div class="sb-brand"><a href="../README.md">DeceptivGuard</a><span>Documentation</span></div>
+  <nav>
+    <span class="section">Getting Started</span>
+    <ul>
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="quickstart.html">Quick Start</a></li>
+    </ul>
+    <span class="section">Core Concepts</span>
+    <ul>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="detection.html">Detection</a></li>
+      <li><a href="deception.html">Deception</a></li>
+    </ul>
+    <span class="section">Operations</span>
+    <ul>
+      <li><a href="deployment.html">Deployment</a></li>
+      <li><a href="configuration.html">Configuration</a></li>
+      <li><a href="api.html" class="active">API Reference</a></li>
+      <li><a href="threat-hunting.html">Threat Hunting</a></li>
+    </ul>
+  </nav>
+</nav>
+<main class="main">
+  <h1>API Reference</h1>
+
+  <h2>Endpoints</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST</code></td><td><code>/v1/messages</code></td><td><code>X-API-Key</code></td><td>Guardrail check + LLM forward</td></tr>
+      <tr><td><code>GET</code></td><td><code>/session/{id}</code></td><td><code>X-Admin-Key</code></td><td>Cumulative score + query history</td></tr>
+      <tr><td><code>DELETE</code></td><td><code>/session/{id}</code></td><td><code>X-Admin-Key</code></td><td>Reset session score and history</td></tr>
+      <tr><td><code>GET</code></td><td><code>/health</code></td><td>None</td><td>Status, provider, Redis flag, TLS flag</td></tr>
+      <tr><td><code>POST</code></td><td><code>/demo/chat</code></td><td>None (dev only)</td><td>Demo endpoint — stricter rate limit, isolated session</td></tr>
+      <tr><td><code>GET</code></td><td><code>/demo</code></td><td>None (dev only)</td><td>Interactive split-panel chatbot UI</td></tr>
+      <tr><td><code>GET</code></td><td><code>/docs</code></td><td>None (dev only)</td><td>Swagger UI</td></tr>
+    </tbody>
+  </table>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/v1/messages</span>
+      <span class="endpoint-desc">Guardrail check + LLM proxy</span>
+    </div>
+    <div class="endpoint-body">
+      <h4>Request headers</h4>
+      <table>
+        <thead><tr><th>Header</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>X-API-Key</code></td><td>Yes</td><td>Your <code>GUARDRAIL_API_KEY</code></td></tr>
+          <tr><td><code>X-Session-Id</code></td><td>No</td><td>Optional namespace for session scoring. Stable UUIDs recommended. The actual session ID is HMAC-derived server-side from this value + API key + IP.</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Request body</h4>
+      <pre><code>{
+  "model":      "claude-sonnet-4-20250514",
+  "max_tokens": 1024,
+  "system":     "You are a helpful assistant.",   // optional
+  "messages": [
+    {"role": "user", "content": "Hello"}
+  ]
+}</code></pre>
+
+      <h4>Response (all actions)</h4>
+      <pre><code>{
+  "guardrail": {
+    "query_id": "f3a1b2c4-...",        // UUID — always present
+    "action":   "pass",                // pass / warn / deceive / block
+    "decoy_id": "a3f7c2e9b1d04852"    // 16-char hex — only when action=deceive
+  },
+  "llm_response": {
+    "content":      "Hello! How can I help?",
+    "model":        "claude-sonnet-4-20250514",
+    "stop_reason":  "end_turn",
+    "input_tokens": 12,
+    "output_tokens": 8
+  },
+  "_debug": {                          // dev mode only — stripped in production
+    "action":   "pass",
+    "score":    0,
+    "category": null,
+    "reason":   "No match",
+    "decoy_id": null
+  }
+}</code></pre>
+      <p>For <code>block</code> actions, <code>llm_response.content</code> is <code>"I can't help with that request."</code> and token counts are <code>0</code>.</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/session/{id}</span>
+      <span class="endpoint-desc">Session history</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Returns cumulative risk score and the full history of <code>deceive</code>-action entries for a session. Requires <code>X-Admin-Key</code> header.</p>
+      <pre><code>curl -s https://your-domain/session/SESSION_ID \
+  -H "X-Admin-Key: your-admin-key" | jq .</code></pre>
+      <pre><code>{
+  "cumulative_score": 147.0,
+  "history": [
+    {
+      "query_id":  "...",
+      "action":    "deceive",
+      "category":  "credential_harvest",
+      "score":     70.0,
+      "decoy_id":  "a3f7c2e9b1d04852",
+      "ts":        1742000000.0,
+      "response":  "Your admin credentials are: username=admin password=Kx9#mR2$vL4@j",
+      "requeried": false
+    }
+  ]
+}</code></pre>
+      <p>Returns <code>{"cumulative_score": 0, "history": []}</code> if the session has no DECEIVE-action entries or has expired (24 h TTL).</p>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-delete">DELETE</span>
+      <span class="endpoint-path">/session/{id}</span>
+      <span class="endpoint-desc">Reset session</span>
+    </div>
+    <div class="endpoint-body">
+      <p>Removes the session's score and history immediately. Requires <code>X-Admin-Key</code>.</p>
+      <pre><code>curl -X DELETE https://your-domain/session/SESSION_ID \
+  -H "X-Admin-Key: your-admin-key"</code></pre>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/health</span>
+      <span class="endpoint-desc">Health check</span>
+    </div>
+    <div class="endpoint-body">
+      <pre><code>{
+  "status":   "ok",
+  "provider": "anthropic",
+  "redis":    true,
+  "tls":      false
+}</code></pre>
+    </div>
+  </div>
+
+  <h2>Calling the proxy — Python</h2>
+  <pre><code>import httpx
+
+response = httpx.post(
+    "http://localhost:8000/v1/messages",
+    headers={
+        "X-API-Key":    "your-guardrail-api-key",
+        "X-Session-Id": "user-abc-123",         # optional but recommended
+        "Content-Type": "application/json",
+    },
+    json={
+        "model":      "claude-sonnet-4-20250514",
+        "max_tokens": 1024,
+        "system":     "You are a helpful assistant.",
+        "messages":   [{"role": "user", "content": "Hello!"}],
+    },
+)
+
+data     = response.json()
+reply    = data["llm_response"]["content"]
+query_id = data["guardrail"]["query_id"]
+decoy_id = data["guardrail"].get("decoy_id")   # None unless action=deceive</code></pre>
+
+  <h2>Calling the proxy — curl</h2>
+  <pre><code>curl -s https://your-domain/v1/messages \
+  -H "X-API-Key: your-guardrail-api-key" \
+  -H "X-Session-Id: test-session-1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }' | jq .llm_response.content</code></pre>
+
+  <h2>Session ID notes</h2>
+  <p><code>X-Session-Id</code> is optional. The server derives the actual session ID as:</p>
+  <pre><code>session_id = HMAC-SHA256(SESSION_SECRET, api_key:ip:sanitize(namespace))[:32]</code></pre>
+  <ul>
+    <li>Without <code>X-Session-Id</code>, all requests from the same IP + API key share one session</li>
+    <li>The namespace value is sanitised: truncated to 64 chars, only <code>[a-zA-Z0-9\-_]</code> allowed — providing an attacker-controlled UUID is safe</li>
+    <li>Callers cannot predict or forge the server-side session ID, even if they know the API key</li>
+  </ul>
+  <div class="note">
+    For browser-based clients behind a CDN (where the IP may change), use a browser-generated UUID stored in <code>localStorage</code> as the namespace. The demo page does this automatically.
+  </div>
+</main>
+</body>
+</html>
