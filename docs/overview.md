@@ -1,6 +1,6 @@
 # DeceptivGuard — Overview
 
-**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md)
+**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md) · [Testing](testing.md)
 
 ---
 
@@ -43,7 +43,7 @@ Session history also matters: once a session's cumulative score crosses `SESSION
 | [Deployment](deployment.md) | Production setup with nginx, Redis, TLS, and systemd |
 | [Configuration](configuration.md) | Full environment variable reference |
 | [API](api.md) | Endpoints, request/response format, calling examples |
-| [Threat Hunting](threat-hunting.md) | Deceive log, attribution, session inspection |
+| [Threat Hunting](threat-hunting.md) · [Testing](testing.md) | Deceive log, attribution, session inspection |
 
 ## Research paper
 

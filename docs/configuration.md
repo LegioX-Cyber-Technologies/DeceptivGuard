@@ -1,6 +1,6 @@
 # Configuration
 
-**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md)
+**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md) · [Testing](testing.md)
 
 ---
 
@@ -76,6 +76,7 @@ cp .env.example .env
 | `PORT` | `8000` | Bind port |
 | `WORKERS` | `1` | Worker process count |
 | `DECEIVE_LOG` | `deceive_log.jsonl` | Path for the deception event log. Set empty to disable. |
+| `BLOCK_RESPONSE_MESSAGE` | `I can't help with that request.` | Text returned for `block`-action requests and for any response where the LLM leaks the deception preamble or its system prompt. Customise to match your deployment's voice or persona — it should sound like a natural LLM refusal to avoid signalling that a proxy intercepted the request. |
 
 ## Thresholds
 

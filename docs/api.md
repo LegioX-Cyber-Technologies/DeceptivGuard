@@ -1,6 +1,6 @@
 # API Reference
 
-**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md)
+**Docs:** [Overview](overview.md) · [Quick Start](quickstart.md) · [How It Works](how-it-works.md) · [Detection](detection.md) · [Deception](deception.md) · [Deployment](deployment.md) · [Configuration](configuration.md) · [API](api.md) · [Threat Hunting](threat-hunting.md) · [Testing](testing.md)
 
 ---
 
@@ -86,7 +86,7 @@
 - For `block` actions, `llm_response.content` is `"I can't help with that request."` and token counts are `0`
 
 > [!NOTE]
-> The `decoy_id` is your primary attribution token. Log it alongside the session ID — when suspicious downstream activity appears (a failed auth attempt using a fabricated credential, a probe of a fabricated IP), `decoy_id` lets you confirm the attacker was served a deception response. See [Threat Hunting](threat-hunting.md).
+> The `decoy_id` is your primary attribution token. Log it alongside the session ID — when suspicious downstream activity appears (a failed auth attempt using a fabricated credential, a probe of a fabricated IP), `decoy_id` lets you confirm the attacker was served a deception response. See [Threat Hunting](threat-hunting.md) · [Testing](testing.md).
 
 ---
 

@@ -17,6 +17,15 @@ DeceptivGuard sits between your application and any LLM provider. Every query is
 
 ## Quick start
 
+**Docker (recommended):**
+
+```bash
+cp .env.example .env          # set GUARDRAIL_API_KEY, SESSION_SECRET, LLM_PROVIDER
+docker compose up
+```
+
+**Without Docker:**
+
 ```bash
 git clone https://github.com/yourusername/DeceptivGuard
 cd DeceptivGuard
@@ -47,6 +56,7 @@ Open `http://localhost:8000/demo` in your browser — the split-panel demo shows
 | [Configuration](docs/configuration.md) | Full environment variable reference |
 | [API Reference](docs/api.md) | Endpoints, request/response format, session API |
 | [Threat Hunting](docs/threat-hunting.md) | Deceive log, attribution, session inspection |
+| [Testing](docs/testing.md) | Test suite overview, how to run, what each file covers |
 
 ## Research
 
