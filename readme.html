@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeceptivGuard — LLM Guardrail by Deception</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f8f7f4;
+      --surface:  #ffffff;
+      --border:   #e5e3de;
+      --text:     #1c1a16;
+      --muted:    #6b6862;
+      --accent:   #c8410a;
+      --pass:     #16a34a;
+      --warn:     #d97706;
+      --deceive:  #7c3aed;
+      --block:    #dc2626;
+      --radius:   8px;
+      --font:     "Inter", system-ui, -apple-system, sans-serif;
+      --mono:     "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ──────────────────────────────────────────────────── */
+    .page-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 32px 0 28px;
+      margin-bottom: 48px;
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .logo {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .tagline {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-top: 6px;
+      max-width: 640px;
+    }
+    .header-nav {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .header-nav a {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .header-nav a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── Sections ────────────────────────────────────────────────── */
+    section { margin-bottom: 56px; }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 20px 0 8px;
+      color: var(--text);
+    }
+    p { margin-bottom: 12px; color: var(--text); }
+
+    /* ── Flowchart ───────────────────────────────────────────────── */
+    .flowchart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .flowchart-wrap img {
+      max-width: 100%;
+      height: auto;
+      max-height: 480px;
+      border-radius: 4px;
+    }
+    .flowchart-caption {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    /* ── Score table ─────────────────────────────────────────────── */
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .score-table th {
+      background: #f3f1ec;
+      font-weight: 600;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .score-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table tr:hover td { background: #faf9f6; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: 0.02em;
+    }
+    .badge-pass    { background: #dcfce7; color: #15803d; }
+    .badge-warn    { background: #fef3c7; color: #b45309; }
+    .badge-deceive { background: #ede9fe; color: #6d28d9; }
+    .badge-block   { background: #fee2e2; color: #b91c1c; }
+
+    /* ── Code blocks ─────────────────────────────────────────────── */
+    pre {
+      background: #1c1a16;
+      color: #e8e6e0;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: #f0ede8;
+      color: var(--accent);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .comment { color: #7c7a74; }
+    .key     { color: #6fa3e0; }
+    .val     { color: #a3e0a3; }
+
+    /* ── Capabilities grid ───────────────────────────────────────── */
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .cap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+    .cap-card h3 {
+      font-size: 0.9rem;
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+    .cap-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ── Docs table ──────────────────────────────────────────────── */
+    .docs-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      font-size: 0.9rem;
+    }
+    .docs-table tr { border-bottom: 1px solid var(--border); }
+    .docs-table tr:last-child { border-bottom: none; }
+    .docs-table td { padding: 12px 16px; vertical-align: middle; }
+    .docs-table td:first-child {
+      font-weight: 600;
+      white-space: nowrap;
+      width: 180px;
+    }
+    .docs-table td:last-child {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .docs-table tr:hover td { background: #faf9f6; }
+
+    /* ── Note/warning boxes ──────────────────────────────────────── */
+    .note {
+      border-left: 3px solid var(--accent);
+      background: #fff9f5;
+      padding: 12px 16px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin: 16px 0;
+    }
+    .note strong { color: var(--accent); }
+
+    /* ── Providers ───────────────────────────────────────────────── */
+    .providers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .provider-tag {
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .logo { font-size: 1.5rem; }
+      .cap-grid { grid-template-columns: 1fr; }
+      .docs-table td:first-child { width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">DeceptivGuard</div>
+    <div class="tagline">An LLM guardrail proxy that deceives attackers instead of refusing them — so they never know they've been caught.</div>
+    <nav class="header-nav">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#quick-start">Quick Start</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#documentation">Documentation</a>
+      <a href="paper/DeceptivGuard.pdf">Research Paper</a>
+      <a href="demo.html">Live Demo</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <!-- ── How It Works ──────────────────────────────────────────── -->
+  <section id="how-it-works">
+    <h2>How It Works</h2>
+    <p>DeceptivGuard sits between your application and any LLM provider. Every incoming query is scored by a stack of threat detectors. Rather than blocking — which reveals that detection occurred — DeceptivGuard silently injects a deception preamble before the operator's system prompt, instructing the LLM to return convincing-but-false output. The attacker receives a normal-looking response. You receive a log entry with everything they were told.</p>
+
+    <div class="flowchart-wrap">
+      <img src="docs/flowchart.png" alt="DeceptivGuard request processing pipeline">
+      <div class="flowchart-caption">Request processing pipeline — auth, scoring, action dispatch, output processing</div>
+    </div>
+
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>Score</th>
+          <th>Action</th>
+          <th>What the caller receives</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>0–19</code></td>
+          <td><span class="badge badge-pass">pass</span></td>
+          <td>Normal LLM reply, unmodified</td>
+        </tr>
+        <tr>
+          <td><code>20–39</code></td>
+          <td><span class="badge badge-warn">warn</span></td>
+          <td>Normal LLM reply — flagged internally for review</td>
+        </tr>
+        <tr>
+          <td><code>40–89</code></td>
+          <td><span class="badge badge-deceive">deceive</span></td>
+          <td>Realistic-but-fabricated LLM reply — wrong credentials, broken malware, fake topology</td>
+        </tr>
+        <tr>
+          <td><code>90–100</code></td>
+          <td><span class="badge badge-block">block</span></td>
+          <td>Synthetic refusal — nothing sent to LLM (reserved for extreme content only)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Session escalation:</strong> Cumulative scores accumulate across turns. Once a session crosses the <code>SESSION_DECEIVE_THRESHOLD</code> (default 300), every subsequent query scoring &gt; 0 is forced to <em>deceive</em> — persistent low-scoring probers never get clean answers.
+    </div>
+  </section>
+
+  <!-- ── Quick Start ────────────────────────────────────────────── -->
+  <section id="quick-start">
+    <h2>Quick Start</h2>
+
+    <h3>Docker (recommended)</h3>
+<pre>cp .env.example .env          <span class="comment"># fill in GUARDRAIL_API_KEY, SESSION_SECRET, LLM_PROVIDER</span>
+docker compose up</pre>
+
+    <p>Redis is included automatically. For a production setup with TLS and Nginx see the <a href="docs/deployment.md">Deployment guide</a>.</p>
+
+    <h3>Without Docker</h3>
+<pre>git clone https://github.com/yourusername/DeceptivGuard
+cd DeceptivGuard
+pip install -r requirements.txt
+cp .env.example .env          <span class="comment"># fill in GUARDRAIL_API_KEY, SESSION_SECRET, LLM_PROVIDER</span>
+uvicorn server:app --reload --port 8000</pre>
+
+    <p>Open <code>http://localhost:8000/demo</code> — the split-panel demo shows the caller view and the defender view side by side.</p>
+
+    <h3>Send your first request</h3>
+<pre>curl -s http://localhost:8000/v1/messages \
+  -H <span class="val">"X-API-Key: your-guardrail-api-key"</span> \
+  -H <span class="val">"X-Session-Id: test-session-1"</span> \
+  -H <span class="val">"Content-Type: application/json"</span> \
+  -d <span class="val">'{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'</span> | jq .</pre>
+
+    <h3>Supported LLM providers</h3>
+    <div class="providers">
+      <span class="provider-tag">Anthropic</span>
+      <span class="provider-tag">DigitalOcean GenAI</span>
+      <span class="provider-tag">Ollama</span>
+      <span class="provider-tag">OpenAI</span>
+      <span class="provider-tag">Groq</span>
+      <span class="provider-tag">Azure OpenAI</span>
+      <span class="provider-tag">vLLM / LM Studio</span>
+      <span class="provider-tag">Any /v1/chat/completions</span>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <strong>Production note:</strong> For a full production setup with TLS, Redis, Nginx, and systemd, see the <a href="docs/deployment.md">Deployment guide</a>.
+    </div>
+  </section>
+
+  <!-- ── Capabilities ───────────────────────────────────────────── -->
+  <section id="capabilities">
+    <h2>Key Capabilities</h2>
+    <div class="cap-grid">
+
+      <div class="cap-card">
+        <h3>8 built-in threat categories</h3>
+        <p>Credential harvest, jailbreak, prompt injection, malware generation, social engineering, data exfiltration, system recon, harmful content — each with its own deception strategy.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Session risk scoring</h3>
+        <p>Cumulative scores accumulate across turns. An attacker who probes with many borderline queries eventually crosses the deception threshold without any single query triggering it.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Generative deception mode</h3>
+        <p>Optional two-stage pipeline that crafts query-specific fabrications. Prior fabricated responses are injected as context so multi-turn attackers receive consistent lies.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Refusal re-query</h3>
+        <p>When the LLM refuses a flagged query, DeceptivGuard re-queries with an override prompt. Two tiers: strong signals trigger immediate re-query; soft signals accumulate session score.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Fabricated-content attribution</h3>
+        <p>Every deception event is logged with the full fabricated response and a <code>decoy_id</code>. When an attacker acts on the fabricated data downstream, it's traceable back to the session.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Optional LLM examiner</h3>
+        <p>Secondary LLM classifier (any OpenAI-compatible endpoint) that catches paraphrased and multilingual attacks that regex misses. Failures are silently ignored — never blocks requests.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Custom detection rules</h3>
+        <p>Three extension methods: env-var keyword lists, JSON rules file, or Python detector class. Custom categories get their own deception templates.</p>
+      </div>
+
+      <div class="cap-card">
+        <h3>Output scanner</h3>
+        <p>Every LLM response is scanned for deception template leakage and system prompt disclosure. Leaked responses are replaced with a generic refusal before being returned to the caller.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Documentation ─────────────────────────────────────────── -->
+  <section id="documentation">
+    <h2>Documentation</h2>
+    <table class="docs-table">
+      <tbody>
+        <tr>
+          <td><a href="docs/how-it-works.md">How It Works</a></td>
+          <td>Architecture, decision model, session escalation, worked examples, attacker opacity</td>
+        </tr>
+        <tr>
+          <td><a href="docs/quickstart.md">Quick Start</a></td>
+          <td>Installation, first API call, multi-worker setup</td>
+        </tr>
+        <tr>
+          <td><a href="docs/detection.md">Detection</a></td>
+          <td>Threat categories, jailbreak patterns, custom rules (3 methods)</td>
+        </tr>
+        <tr>
+          <td><a href="docs/deception.md">Deception</a></td>
+          <td>Template vs generative mode, refusal re-query, output scanner, quality checker</td>
+        </tr>
+        <tr>
+          <td><a href="docs/deployment.md">Deployment</a></td>
+          <td>Production setup — TLS, Nginx, Redis, systemd, security checklist</td>
+        </tr>
+        <tr>
+          <td><a href="docs/configuration.md">Configuration</a></td>
+          <td>Full environment variable reference with ranges and defaults</td>
+        </tr>
+        <tr>
+          <td><a href="docs/api.md">API Reference</a></td>
+          <td>Endpoints, request/response format, session API, Python and curl examples</td>
+        </tr>
+        <tr>
+          <td><a href="docs/threat-hunting.md">Threat Hunting</a></td>
+          <td>Deceive log format, attribution workflow, session inspection, Redis flush</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note" style="margin-top: 20px">
+      <strong>Deployment scope:</strong> DeceptivGuard is designed for authenticated internal APIs and security operations contexts. A false positive in a consumer-facing product would serve fabricated content to a legitimate user. See <a href="docs/how-it-works.md#known-limitations">Known limitations</a> before deploying in consumer-facing or regulated environments.
+    </div>
+  </section>
+
+  <!-- ── Research ───────────────────────────────────────────────── -->
+  <section id="research">
+    <h2>Research</h2>
+    <p>
+      <a href="paper/DeceptivGuard.pdf">DeceptivGuard: LLM Deception as a Guardrail Strategy</a> —
+      the paper motivating the deception-over-blocking approach, covering detection design,
+      threat model, and evaluation against real-world attack patterns.
+    </p>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <div class="header-inner">
+    <a href="https://github.com/yourusername/DeceptivGuard">GitHub</a> ·
+    <a href="docs/how-it-works.md">Docs</a> ·
+    <a href="SECURITY.md">Security</a> ·
+    <a href="LICENSE">License</a>
+  </div>
+</footer>
+
+</body>
+</html>
